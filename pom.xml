@@ -30,6 +30,15 @@
         <tag>HEAD</tag>
     </scm>
 
+	<!-- wplex internal repository -->
+    <repositories>
+		<repository>
+		<id>archiva.internal</id>
+		<name>repositorio interno wplex</name>
+		<url>http://192.168.0.103:8081/repository/internal/</url>
+		</repository>
+	</repositories>
+
     <developers>
         <developer>
             <id>kongchen</id>
@@ -44,6 +53,11 @@
         <developer>
             <id>who</id>
             <name>Andrew B</name>
+        </developer>
+        <developer>
+        	<id>ryanpadilha</id>
+        	<name>Ryan Padilha</name>
+        	<timezone>-3</timezone>
         </developer>
     </developers>
 
@@ -209,6 +223,13 @@
             <artifactId>junit-addons</artifactId>
             <version>${junit-addons.version}</version>
 	    <scope>test</scope>
+        </dependency>
+
+        <!-- wplex-services artifactory -->
+        <dependency>
+        	<groupId>com.wplex</groupId>
+        	<artifactId>wplex-services</artifactId>
+        	<version>0.0.20</version>
         </dependency>
     </dependencies>
 

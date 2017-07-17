@@ -46,7 +46,7 @@ public class ApiDocumentMojo extends AbstractMojo {
      */
     @Parameter(property = "swagger.skip", defaultValue = "false")
     private boolean skipSwaggerGeneration;
-    
+
     @Parameter(property="file.encoding")
     private String encoding;
 
@@ -86,9 +86,17 @@ public class ApiDocumentMojo extends AbstractMojo {
             getLog().debug(apiSources.toString());
             for (ApiSource apiSource : apiSources) {
                 validateConfiguration(apiSource);
-                AbstractDocumentSource documentSource = apiSource.isSpringmvc()
-                        ? new SpringMavenDocumentSource(apiSource, getLog(), projectEncoding)
-                        : new MavenDocumentSource(apiSource, getLog(), projectEncoding);
+
+                // wplex-services verification
+                AbstractDocumentSource documentSource = null;
+
+                if (apiSource.isWplexServices()) {
+                	// TODO implement here!
+                } else {
+                	documentSource = apiSource.isSpringmvc()
+                			? new SpringMavenDocumentSource(apiSource, getLog(), projectEncoding)
+                					: new MavenDocumentSource(apiSource, getLog(), projectEncoding);
+                }
 
                 documentSource.loadTypesToSkip();
                 documentSource.loadModelModifier();
@@ -181,7 +189,7 @@ public class ApiDocumentMojo extends AbstractMojo {
             return false;
         }
     }
-    
+
     private String getSwaggerFileName(String swaggerFileName) {
         return swaggerFileName == null || "".equals(swaggerFileName.trim()) ? "swagger" : swaggerFileName;
     }
