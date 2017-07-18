@@ -74,7 +74,7 @@ public class WplexMavenDocumentSource extends AbstractDocumentSource {
 		}
 	}
 
-	private Sets.SetView<Class<?>> getValidClasses() {
+	public Sets.SetView<Class<?>> getValidClasses() {
 		return Sets.union(apiSource.getValidClasses(Api.class), apiSource.getValidClasses(RouteResource.class));
 	}
 
