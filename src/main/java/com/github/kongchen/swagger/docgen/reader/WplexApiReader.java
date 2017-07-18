@@ -100,6 +100,13 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 
 				// http method-verb
 				String httpMethod = methodRoute.method().toString().toLowerCase();
+				Operation operation = parseMethod(method);
+				updateOperationParameters(parentParameters, regexMap, operation);
+				updateOperationProtocols(apiOperation, operation);
+				
+				// TODO consumes, produces
+				
+				//
 
 			}
 			updateTagDescriptions();
