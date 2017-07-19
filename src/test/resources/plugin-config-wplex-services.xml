@@ -26,7 +26,7 @@
                                 if you need to use html or other markup language, you need to use your target language,
                                  and note escape your description for xml -->
                                 <description>
-                                    This is a sample.
+                                    This is a sample JSON for wplex services.
                                 </description>
                                 <termsOfService>
                                     https://github.com/wplex/swagger-maven-plugin

@@ -58,10 +58,19 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 		super(swagger, log);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Swagger read(Set<Class<?>> classes) throws GenerateException {
-		// TODO Auto-generated method stub
-		return null;
+		for (Class cls : classes) {
+			read(cls);
+		}
+
+		return swagger;
+	}
+
+	@SuppressWarnings("rawtypes")
+	public Swagger read(Class cls) {
+		return read(cls, "", null, false, new String[0], new String[0], new HashMap<String, Tag>(), new ArrayList<Parameter>());
 	}
 
 	protected Swagger read(Class<?> cls, String parentPath, String parentMethod, boolean readHidden,
@@ -103,9 +112,9 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 				Operation operation = parseMethod(method);
 				updateOperationParameters(parentParameters, regexMap, operation);
 				updateOperationProtocols(apiOperation, operation);
-				
+
 				// TODO consumes, produces
-				
+
 				//
 
 			}
