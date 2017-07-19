@@ -6,7 +6,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import com.github.kongchen.swagger.docgen.GenerateException;
-
 import com.wplex.services.common.annotation.Route;
 import com.wplex.services.common.annotation.RouteResource;
 import com.wplex.services.common.resource.Response;
@@ -31,7 +29,6 @@ import io.swagger.annotations.Authorization;
 import io.swagger.annotations.AuthorizationScope;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.converter.ModelConverters;
-import io.swagger.jaxrs.ext.SwaggerExtension;
 import io.swagger.models.Model;
 import io.swagger.models.Operation;
 import io.swagger.models.SecurityRequirement;
@@ -83,7 +80,6 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 
 		Api api = AnnotationUtils.findAnnotation(cls, Api.class);
 		RouteResource apiRouteResource = AnnotationUtils.findAnnotation(cls, RouteResource.class);
-		Route apiRoute = AnnotationUtils.findAnnotation(cls, Route.class);
 
 		// only read if allowing hidden apis OR api is not marked as hidden
 		if (!canReadApi(readHidden, api)) {
@@ -102,7 +98,7 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 
 			Route methodRoute = AnnotationUtils.findAnnotation(method, Route.class);
 
-			String operationRoute = getRoute(apiRouteResource, apiRoute, parentPath);
+			String operationRoute = getRoute(apiRouteResource, methodRoute, parentPath);
 			if (operationRoute != null) {
 				Map<String, String> regexMap = new HashMap<String, String>();
 				operationRoute = parseOperationPath(operationRoute, regexMap);
@@ -114,10 +110,21 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 				updateOperationProtocols(apiOperation, operation);
 
 				// TODO consumes, produces
+				String[] apiConsumes = new String[0];
+				String[] apiProduces = new String[0];
 
-				//
+				apiConsumes = updateOperationConsumes(parentConsumes, apiConsumes, operation);
+				apiProduces = updateOperationProduces(parentProduces, apiProduces, operation);
 
+				handleSubResource(apiConsumes, httpMethod, apiProduces, tags, method, operationRoute, operation);
+
+				// can't continue without a valid http method
+				httpMethod = (httpMethod == null) ? parentMethod : httpMethod;
+				updateTagsForOperation(operation, apiOperation);
+				updateOperation(apiConsumes, apiProduces, tags, securities, operation);
+				updatePath(operationRoute, httpMethod, operation);
 			}
+
 			updateTagDescriptions();
 		}
 
@@ -190,6 +197,18 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 				}
 			}
 		}
+	}
+
+	private void handleSubResource(String[] apiConsumes, String httpMethod, String[] apiProduces, Map<String, Tag> tags, Method method, String operationPath, Operation operation) {
+		if (isSubResource(method)) {
+			Class<?> responseClass = method.getReturnType();
+			Swagger subSwagger = read(responseClass, operationPath, httpMethod, true, apiConsumes, apiProduces, tags, operation.getParameters());
+		}
+	}
+
+	protected boolean isSubResource(Method method) {
+		Class<?> responseClass = method.getReturnType();
+		return (responseClass != null) && (AnnotationUtils.findAnnotation(responseClass, Api.class) != null);
 	}
 
 	private Operation parseMethod(Method method) {
@@ -277,7 +296,7 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 					Property responseProperty = RESPONSE_CONTAINER_CONVERTER.withResponseContainer(responseContainer, property);
 
 					operation.response(apiOperation.code(), new io.swagger.models.Response()
-							.description("sucessful operation")
+							.description("successful operation")
 							.schema(responseProperty)
 							.headers(defaultResponseHeaders));
 				}
@@ -286,7 +305,7 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 				if (models.isEmpty()) {
 					Property p = ModelConverters.getInstance().readAsProperty(responseClass);
 					operation.response(apiOperation.code(), new io.swagger.models.Response()
-							.description("sucessfull operation")
+							.description("successful operation")
 							.schema(p)
 							.headers(defaultResponseHeaders));
 				}
@@ -295,7 +314,7 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 					Property responseProperty = RESPONSE_CONTAINER_CONVERTER.withResponseContainer(responseContainer, new RefProperty().asDefault(key));
 
 					operation.response(apiOperation.code(), new io.swagger.models.Response()
-							.description("sucessfull operation")
+							.description("successful operation")
 							.schema(responseProperty)
 							.headers(defaultResponseHeaders));
 					swagger.model(key, models.get(key));
@@ -368,6 +387,7 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 		return mergedAnnotations;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Annotation[] merge(Annotation[] annotations, Annotation[] annotations2) {
 		Set<Annotation> mergedAnnotations = new HashSet<Annotation>();
 		mergedAnnotations.addAll(Arrays.asList(annotations));
