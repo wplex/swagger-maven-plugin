@@ -3,7 +3,10 @@ package com.github.kongchen.swagger.docgen.reader;
 import com.github.kongchen.swagger.docgen.jaxrs.BeanParamInjectParamExtention;
 import com.github.kongchen.swagger.docgen.jaxrs.JaxrsParameterExtension;
 import com.github.kongchen.swagger.docgen.spring.SpringSwaggerExtension;
+import com.github.kongchen.swagger.docgen.wservices.WplexSwaggerExtension;
 import com.sun.jersey.api.core.InjectParam;
+import com.wplex.services.common.annotation.Body;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -104,13 +107,18 @@ public abstract class AbstractReader {
     private void updateExtensionChain() {
         List<SwaggerExtension> extensions = new ArrayList<SwaggerExtension>();
         Class<? extends AbstractReader> clazz = this.getClass();
-        if (clazz == SpringMvcApiReader.class || SpringMvcApiReader.class.isAssignableFrom(clazz)) {
+
+        // wplex-services extension for parameters
+        if (clazz == WplexApiReader.class || WplexApiReader.class.isAssignableFrom(clazz)) {
+        	extensions.add(new WplexSwaggerExtension());
+        } else if (clazz == SpringMvcApiReader.class || SpringMvcApiReader.class.isAssignableFrom(clazz)) {
             extensions.add(new SpringSwaggerExtension());
         } else {
             extensions.add(new BeanParamInjectParamExtention());
             extensions.add(new SwaggerJerseyJaxrs());
             extensions.add(new JaxrsParameterExtension());
         }
+
         SwaggerExtensions.setExtensions(extensions);
     }
 
@@ -368,6 +376,10 @@ public abstract class AbstractReader {
         validParameterAnnotations.add(RequestHeader.class);
         validParameterAnnotations.add(RequestPart.class);
 
+        // wplex parameter anotations
+        validParameterAnnotations.add(Body.class);
+        validParameterAnnotations.add(com.wplex.services.common.annotation.QueryParam.class);
+        validParameterAnnotations.add(com.wplex.services.common.annotation.PathParam.class);
 
         boolean hasValidAnnotation = false;
         for (Annotation potentialAnnotation : parameterAnnotations) {
