@@ -256,8 +256,8 @@ There's a [sample here](https://github.com/swagger-maven-plugin/swagger-maven-ex
     <configuration>
         <apiSources>
             <apiSource>
-	            <wplexServices>true</wplexServices>
-				<springmvc>false</springmvc>
+                <wplexServices>true</wplexServices>
+                <springmvc>false</springmvc>
                 <locations>
                     <location>com.wplex.wservices</location>
                 </locations>
