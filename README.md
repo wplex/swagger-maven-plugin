@@ -1,4 +1,4 @@
-# Swagger Maven Plugin 
+# Swagger Maven Plugin for WPLEX Services
 [![Build Status](https://travis-ci.org/kongchen/swagger-maven-plugin.png)](https://travis-ci.org/kongchen/swagger-maven-plugin)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.kongchen/swagger-maven-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.kongchen/swagger-maven-plugin)
 
@@ -7,7 +7,7 @@ This plugin enables your Swagger-annotated project to generate **Swagger specs**
 # Features
 
 * Supports [Swagger Spec 2.0](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md)
-* Supports [SpringMvc](http://docs.spring.io/spring/docs/current/spring-framework-reference/html/mvc.html) & [JAX-RS](https://jax-rs-spec.java.net/)
+* Supports [SpringMvc](http://docs.spring.io/spring/docs/current/spring-framework-reference/html/mvc.html), [JAX-RS](https://jax-rs-spec.java.net/) & [WPLEX Services](http://wplex.com.br)
 * Quickly generates *[swagger.json](https://github.com/kongchen/swagger-maven-example/blob/master/generated/swagger-ui/swagger.json)* and [static document](http://htmlpreview.github.io/?https://raw.github.com/kongchen/swagger-maven-example/master/generated/document.html) by `mvn compile`
 * Use [Handlebars](http://handlebarsjs.com/) as template to customize the static document.
 
@@ -22,7 +22,7 @@ Version 3.1.0+ of this plugin depends on the repackaged/rebranded io.swagger.swa
 
 
 # Usage
-Import the plugin in your project by adding following configuration in your `plugins` block: 
+Import the plugin in your project by adding following configuration in your `plugins` block:
 
 ```xml
 <build>
@@ -54,6 +54,7 @@ Import the plugin in your project by adding following configuration in your `plu
 
 | **name** | **description** |
 |------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `wplexServices` | Tell the plugin your project is a WPLEX Services (`true`) project, ignoring `springmvc element` |
 | `springmvc` | Tell the plugin your project is a JAX-RS(`false`) or a SpringMvc(`true`) project |
 | `locations` **required**| Classes containing Swagger's annotation ```@Api```, or packages containing those classes can be configured here. Multiple values must be separated by commas. Example: `<locations>com.github.kongchen.swagger.sample.wordnik.resource,com.github.kongchen.swagger.sample.wordnik.resource2</locations>` |
 | `schemes` | The transfer protocol of the API. Values MUST be from the list: `"http"`, `"https"`, `"ws"`, `"wss"`. Multiple values must be separated by commas. Example: `<schemes>http,https</schemes>` |
@@ -73,7 +74,7 @@ Import the plugin in your project by adding following configuration in your `plu
 | `typesToSkip` | Nodes of class names to explicitly skip during parameter processing. More details [below](#typesToSkip)|
 | `apiModelPropertyAccessExclusions` | Allows the exclusion of specified `@ApiModelProperty` fields. This can be used to hide certain model properties from the swagger spec. More details [below](#apiModelPropertyAccessExclusions)|
 | `jsonExampleValues` | If `true`, all example values in `@ApiModelProperty` will be handled as json raw values. This is useful for creating valid examples in the generated json for all property types, including non-string ones. |
-| `modelConverters` | List of custom implementations of `io.swagger.converter.ModelConverter` that should be used when generating the swagger files. | 
+| `modelConverters` | List of custom implementations of `io.swagger.converter.ModelConverter` that should be used when generating the swagger files. |
 
 # <a id="templatefile">Template File</a>
 
@@ -251,22 +252,23 @@ There's a [sample here](https://github.com/swagger-maven-plugin/swagger-maven-ex
 <plugin>
     <groupId>com.github.kongchen</groupId>
     <artifactId>swagger-maven-plugin</artifactId>
-    <version>3.0.0</version>
+    <version>3.1.7</version>
     <configuration>
         <apiSources>
             <apiSource>
-	            <springmvc>true</springmvc>
+	            <wplexServices>true</wplexServices>
+				<springmvc>false</springmvc>
                 <locations>
-                    <location>com.wordnik.swagger.sample</location>
+                    <location>com.wplex.wservices</location>
                 </locations>
                 <schemes>
                     <scheme>http</scheme>
                     <scheme>https</scheme>
                 </schemes>
-                <host>www.example.com:8080</host>
+                <host>www.wplex.com.br:8080</host>
                 <basePath>/api</basePath>
                 <info>
-                    <title>Swagger Maven Plugin Sample</title>
+                    <title>Swagger Maven Plugin for WPLEX Services</title>
                     <version>v1</version>
                     <!-- use markdown here because I'm using markdown for output,
                     if you need to use html or other markup language, you need to use your target language,
@@ -275,12 +277,12 @@ There's a [sample here](https://github.com/swagger-maven-plugin/swagger-maven-ex
                         This is a sample.
                     </description>
                     <termsOfService>
-                        http://www.github.com/kongchen/swagger-maven-plugin
+                        https://github.com/wplex/swagger-maven-plugin
                     </termsOfService>
                     <contact>
-                        <email>kongchen@gmail.com</email>
-                        <name>Kong Chen</name>
-                        <url>http://kongch.com</url>
+                        <name>Ryan Padilha</name>
+                        <email>ryan.padilha@wplex.com.br</email>
+                        <url>https://github.com/ryanpadilha</url>
                     </contact>
                     <license>
                         <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
