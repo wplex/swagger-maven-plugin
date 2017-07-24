@@ -9,7 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
@@ -50,6 +52,7 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WplexApiReader.class);
 	private static final ResponseContainerConverter RESPONSE_CONTAINER_CONVERTER = new ResponseContainerConverter();
+	private static int counter = 0;
 
 	public WplexApiReader(Swagger swagger, Log log) {
 		super(swagger, log);
@@ -67,7 +70,8 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 
 	@SuppressWarnings("rawtypes")
 	public Swagger read(Class cls) {
-		return read(cls, "", null, false, new String[0], new String[0], new HashMap<String, Tag>(), new ArrayList<Parameter>());
+		return read(cls, "", null, false, new String[0], new String[0], new HashMap<String, Tag>(),
+				new ArrayList<Parameter>());
 	}
 
 	protected Swagger read(Class<?> cls, String parentPath, String parentMethod, boolean readHidden,
@@ -105,7 +109,7 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 
 				// http method-verb
 				String httpMethod = methodRoute.method().toString().toLowerCase();
-				Operation operation = parseMethod(method);
+				Operation operation = parseMethod(method, httpMethod);
 				updateOperationParameters(parentParameters, regexMap, operation);
 				updateOperationProtocols(apiOperation, operation);
 
@@ -199,10 +203,12 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 		}
 	}
 
-	private void handleSubResource(String[] apiConsumes, String httpMethod, String[] apiProduces, Map<String, Tag> tags, Method method, String operationPath, Operation operation) {
+	private void handleSubResource(String[] apiConsumes, String httpMethod, String[] apiProduces, Map<String, Tag> tags,
+			Method method, String operationPath, Operation operation) {
 		if (isSubResource(method)) {
 			Class<?> responseClass = method.getReturnType();
-			Swagger subSwagger = read(responseClass, operationPath, httpMethod, true, apiConsumes, apiProduces, tags, operation.getParameters());
+			Swagger subSwagger = read(responseClass, operationPath, httpMethod, true, apiConsumes, apiProduces, tags,
+					operation.getParameters());
 		}
 	}
 
@@ -211,12 +217,36 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 		return (responseClass != null) && (AnnotationUtils.findAnnotation(responseClass, Api.class) != null);
 	}
 
-	private Operation parseMethod(Method method) {
+	private Operation parseMethod(Method method, String httpMethod) {
 		Operation operation = new Operation();
 		ApiOperation apiOperation = AnnotationUtils.findAnnotation(method, ApiOperation.class);
 
-		String operationId = method.getName();
 		String responseContainer = null;
+
+		// swagger specification 2.0 - operationId must be unique
+		String httpAction = "";
+		switch (httpMethod) {
+		case "get":
+			httpAction = "get";
+			break;
+		case "post":
+			httpAction = "create";
+			break;
+		case "delete":
+			httpAction = "delete";
+			break;
+		case "put":
+			httpAction = "update";
+			break;
+		case "head":
+			httpAction = "exists";
+			break;
+		default:
+			httpAction = "notDefined";
+			break;
+		}
+
+		String operationId = httpAction + StringUtils.capitalize(method.getName()) + ++counter;
 
 		Class<?> responseClass = null;
 		Map<String, Property> defaultResponseHeaders = null;
@@ -286,37 +316,33 @@ public class WplexApiReader extends AbstractReader implements ClassSwaggerReader
 			}
 		}
 
-		if (responseClass != null
-				&& !responseClass.equals(Void.class)
-				&& !responseClass.equals(Response.class)
+		if (responseClass != null && !responseClass.equals(Void.class) && !responseClass.equals(Response.class)
 				&& (AnnotationUtils.findAnnotation(responseClass, Api.class) == null)) {
 			if (isPrimitive(responseClass)) {
 				Property property = ModelConverters.getInstance().readAsProperty(responseClass);
 				if (property != null) {
-					Property responseProperty = RESPONSE_CONTAINER_CONVERTER.withResponseContainer(responseContainer, property);
+					Property responseProperty = RESPONSE_CONTAINER_CONVERTER.withResponseContainer(responseContainer,
+							property);
 
-					operation.response(apiOperation.code(), new io.swagger.models.Response()
-							.description("successful operation")
-							.schema(responseProperty)
-							.headers(defaultResponseHeaders));
+					operation.response(apiOperation.code(),
+							new io.swagger.models.Response().description("successful operation")
+									.schema(responseProperty).headers(defaultResponseHeaders));
 				}
 			} else if (!responseClass.equals(Void.class) && !responseClass.equals(void.class)) {
 				Map<String, Model> models = ModelConverters.getInstance().read(responseClass);
 				if (models.isEmpty()) {
 					Property p = ModelConverters.getInstance().readAsProperty(responseClass);
 					operation.response(apiOperation.code(), new io.swagger.models.Response()
-							.description("successful operation")
-							.schema(p)
-							.headers(defaultResponseHeaders));
+							.description("successful operation").schema(p).headers(defaultResponseHeaders));
 				}
 
 				for (String key : models.keySet()) {
-					Property responseProperty = RESPONSE_CONTAINER_CONVERTER.withResponseContainer(responseContainer, new RefProperty().asDefault(key));
+					Property responseProperty = RESPONSE_CONTAINER_CONVERTER.withResponseContainer(responseContainer,
+							new RefProperty().asDefault(key));
 
-					operation.response(apiOperation.code(), new io.swagger.models.Response()
-							.description("successful operation")
-							.schema(responseProperty)
-							.headers(defaultResponseHeaders));
+					operation.response(apiOperation.code(),
+							new io.swagger.models.Response().description("successful operation")
+									.schema(responseProperty).headers(defaultResponseHeaders));
 					swagger.model(key, models.get(key));
 				}
 

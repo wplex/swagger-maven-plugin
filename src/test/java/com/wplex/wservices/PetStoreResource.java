@@ -1,6 +1,5 @@
 package com.wplex.wservices;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -12,8 +11,8 @@ import com.wplex.services.common.annotation.PathParam;
 import com.wplex.services.common.annotation.Route;
 import com.wplex.services.common.annotation.RouteResource;
 import com.wplex.services.common.resource.Request.Method;
-import com.wplex.services.common.resource.Response.Status;
 import com.wplex.services.common.resource.Response;
+import com.wplex.services.common.resource.Response.Status;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

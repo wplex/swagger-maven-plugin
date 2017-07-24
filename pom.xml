@@ -9,13 +9,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.kongchen</groupId>
     <artifactId>swagger-maven-plugin</artifactId>
-    <version>3.1.7-a</version>
+    <version>3.1.7-b</version>
     <packaging>maven-plugin</packaging>
-    <name>Swagger Maven Plugin</name>
+    <name>Swagger Maven Plugin for Wplex Services</name>
     <description>
         A maven build plugin which helps you generate API document during build phase
     </description>
-    <url>https://github.com/kongchen/swagger-maven-plugin</url>
+    <url>https://github.com/wplex/swagger-maven-plugin</url>
     <licenses>
         <license>
             <name>Apache license</name>
@@ -64,7 +64,7 @@
     <properties>
         <maven.version>2.2.1</maven.version>
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
-        <java.version>1.6</java.version>
+        <java.version>1.8</java.version>
         <swagger.version>1.5.13</swagger.version>
         <github.global.server>github</github.global.server>
         <jackson.version>2.8.4</jackson.version>
