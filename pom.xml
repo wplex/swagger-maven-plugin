@@ -38,6 +38,11 @@
 			<name>wplex internal repository</name>
 			<url>http://192.168.0.103:8081/repository/internal/</url>
 		</repository>
+		<repository>
+			<id>central</id>
+			<name>ryan-maquina-3-releases</name>
+			<url>http://192.168.2.66:8081/artifactory/libs-release</url>
+		</repository>
 	</repositories>
 
 	<distributionManagement>
@@ -243,7 +248,6 @@
 	</dependencies>
 
 	<build>
-
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -318,5 +322,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
