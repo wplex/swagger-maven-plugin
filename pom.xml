@@ -47,9 +47,9 @@
 
 	<distributionManagement>
 		<repository>
-			<id>archiva.internal</id>
+			<id>central</id>
 			<name>${project.name}</name>
-			<url>http://192.168.0.103:8081/repository/internal/</url>
+			<url>http://192.168.2.66:8081/artifactory/libs-release</url>
 		</repository>
 	</distributionManagement>
 
